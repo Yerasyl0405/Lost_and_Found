@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Found Items</h2>
+<a href="{% url 'add_found_item' %}" class="btn btn-success mb-3">Report Found Item</a>
+<div class="row">
+    {% for item in items %}
+    <div class="col-md-4">
+        <div class="card mb-3">
+            {% if item.image %}
+            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ item.name }}</h5>
+                <p class="card-text">{{ item.description }}</p>
+                <p class="text-muted">Found at: {{ item.location }}</p>
+                <p class="text-muted">Date Found: {{ item.date_found }}</p>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No found items reported.</p>
+    {% endfor %}
+</div>
+{% endblock %}
