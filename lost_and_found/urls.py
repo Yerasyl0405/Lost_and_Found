@@ -14,10 +14,16 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
 from items import views
+from lost_and_found import settings
+
+from django.contrib import admin
+from django.urls import path
+from items import views  # Ensure views.py is imported
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -29,4 +35,5 @@ urlpatterns = [
     path("found/", views.found_items_list, name="found_items_list"),
     path("lost/add/", views.add_lost_item, name="add_lost_item"),
     path("found/add/", views.add_found_item, name="add_found_item"),
-]
+]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

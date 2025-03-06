@@ -9,6 +9,7 @@
             <th>Name</th>
             <th>Location</th>
             <th>Date Lost</th>
+            <th>Recovered?</th>  <!-- New Boolean Field -->
             <th>Actions</th>
         </tr>
     </thead>
@@ -19,11 +20,18 @@
             <td>{{ item.location }}</td>
             <td>{{ item.date_lost }}</td>
             <td>
+                {% if item.is_recovered %}
+                    ✅ Yes
+                {% else %}
+                    ❌ No
+                {% endif %}
+            </td>
+            <td>
                 <a href="{% url 'delete_lost_item' item.id %}" class="btn btn-danger btn-sm">Delete</a>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">No lost items available.</td></tr>
+        <tr><td colspan="5">No lost items available.</td></tr>
         {% endfor %}
     </tbody>
 </table>
@@ -35,6 +43,7 @@
             <th>Name</th>
             <th>Location</th>
             <th>Date Found</th>
+            <th>Claimed?</th>  <!-- New Boolean Field -->
             <th>Actions</th>
         </tr>
     </thead>
@@ -45,11 +54,18 @@
             <td>{{ item.location }}</td>
             <td>{{ item.date_found }}</td>
             <td>
+                {% if item.is_claimed %}
+                    ✅ Yes
+                {% else %}
+                    ❌ No
+                {% endif %}
+            </td>
+            <td>
                 <a href="{% url 'delete_found_item' item.id %}" class="btn btn-danger btn-sm">Delete</a>
             </td>
         </tr>
         {% empty %}
-        <tr><td colspan="4">No found items available.</td></tr>
+        <tr><td colspan="5">No found items available.</td></tr>
         {% endfor %}
     </tbody>
 </table>

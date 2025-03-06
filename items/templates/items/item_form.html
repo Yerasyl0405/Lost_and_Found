@@ -3,7 +3,9 @@
 <h2>Report an Item</h2>
 <form method="post" enctype="multipart/form-data" class="shadow p-4 bg-light">
     {% csrf_token %}
-    {{ form.as_p }}
+    <div class="mb-3">
+        {{ form.as_p }}
+    </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {% endblock %}

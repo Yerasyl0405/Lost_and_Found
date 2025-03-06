@@ -7,14 +7,14 @@ from .models import LostItem, FoundItem
 
 @admin.register(LostItem)
 class LostItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "location", "date_lost", "user")
+    list_display = ("name", "location", "date_lost", )
     search_fields = ("name", "location")
     list_filter = ("date_lost",)
     actions = ["delete_selected"]
 
 @admin.register(FoundItem)
 class FoundItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "location", "date_found", "user")
+    list_display = ("name", "location", "date_found")
     search_fields = ("name", "location")
     list_filter = ("date_found",)
     actions = ["delete_selected"]
