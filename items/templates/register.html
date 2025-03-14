@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+</head>
+<body>
+    <h2>Welcome, {{ user.username }}</h2>
+    <p>Email: {{ user.email }}</p>
+    <a href="{% url 'logout' %}">Logout</a>
+
+    <h3>Your Lost Items</h3>
+    {% if lost_items %}
+        <ul>
+            {% for item in lost_items %}
+                <li>
+                    <strong>{{ item.name }}</strong> - Lost at {{ item.location }} on {{ item.date_lost }}
+                    {% if item.image %}
+                        <br><img src="{{ item.image.url }}" alt="{{ item.name }}" width="100">
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not reported any lost items.</p>
+    {% endif %}
+
+    <h3>Your Found Items</h3>
+    {% if found_items %}
+        <ul>
+            {% for item in found_items %}
+                <li>
+                    <strong>{{ item.name }}</strong> - Found at {{ item.location }} on {{ item.date_found }}
+                    {% if item.image %}
+                        <br><img src="{{ item.image.url }}" alt="{{ item.name }}" width="100">
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have not reported any found items.</p>
+    {% endif %}
+
+</body>
+</html>

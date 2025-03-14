@@ -19,6 +19,14 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'found_items_list' %}">Found Items</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'add_lost_item' %}">Report Lost Item</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'add_found_item' %}">Report Found Item</a></li>
+
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile ({{ user.username }})</a></li>
+                        <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

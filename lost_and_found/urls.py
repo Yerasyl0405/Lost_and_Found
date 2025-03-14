@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path
 
 from items import views
+from items.views import mark_lost_recovered, mark_found_claimed
 from lost_and_found import settings
 
 from django.contrib import admin
@@ -35,5 +36,13 @@ urlpatterns = [
     path("found/", views.found_items_list, name="found_items_list"),
     path("lost/add/", views.add_lost_item, name="add_lost_item"),
     path("found/add/", views.add_found_item, name="add_found_item"),
-]  + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("register/", views.register, name="register"),
+    path("login/", views.user_login, name="login"),
+    path("logout/", views.user_logout, name="logout"),
+    path("profile/", views.profile, name="profile"),
+    path("mark_lost_recovered/<int:item_id>/", mark_lost_recovered, name="mark_lost_recovered"),
+    path("mark_found_claimed/<int:item_id>/", mark_found_claimed, name="mark_found_claimed"),
+]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

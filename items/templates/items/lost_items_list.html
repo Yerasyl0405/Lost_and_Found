@@ -1,24 +1,32 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<h2>Lost Items</h2>
-<a href="{% url 'add_lost_item' %}" class="btn btn-primary mb-3">Report Lost Item</a>
-<div class="row">
-    {% for item in items %}
-    <div class="col-md-4">
-        <div class="card mb-3">
-            {% if item.image %}
-            <img src="{{ item.image.url }}" class="card-img-top" alt="{{ item.name }}">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ item.name }}</h5>
-                <p class="card-text">{{ item.description }}</p>
-                <p class="text-muted">Lost at: {{ item.location }}</p>
-                <p class="text-muted">Date Lost: {{ item.date_lost }}</p>
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-danger">🔍 Lost Items</h2>
+        <a href="{% url 'add_lost_item' %}" class="btn btn-primary mt-2">Report Lost Item</a>
+    </div>
+
+    <div class="row justify-content-center">
+        {% for item in items %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 mb-4">
+                {% if item.image %}
+                <img src="{{ item.image.url }}" class="card-img-top rounded-top-4" alt="{{ item.name }}" style="height: 250px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold">{{ item.name }}</h5>
+                    <p class="card-text text-muted">{{ item.description }}</p>
+                    <p class="text-danger fw-semibold">📍 Lost at: {{ item.location }}</p>
+                    <p class="text-secondary">📅 Date Lost: {{ item.date_lost }}</p>
+                </div>
             </div>
         </div>
+        {% empty %}
+        <div class="text-center">
+            <p class="text-muted">No lost items reported.</p>
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <p>No lost items reported.</p>
-    {% endfor %}
 </div>
 {% endblock %}
