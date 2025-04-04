@@ -80,8 +80,15 @@ WSGI_APPLICATION = 'lost_and_found.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'lost_and_found'),
+        'USER': os.environ.get('DB_USER', 'yerassyl'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '12345era'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+        'OPTIONS': {
+            'client_encoding': 'UTF8',
+        },
     }
 }
 
@@ -123,20 +130,34 @@ USE_TZ = True
 
 import os
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = "/static/"  # This is required
 
-# Optional: If you want to serve static files from a directory
+# Correct static files configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'  # For production collection (must NOT be in STATICFILES_DIRS)
+
+# Development static files directories
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),  # Ensure this folder exists
+    os.path.join(BASE_DIR, 'static'),  # Your additional static folders
 ]
+
+# Media files configuration (if using MinIO)
+DEFAULT_FILE_STORAGE = 'minio_storage.storage.MinioMediaStorage'
+STATICFILES_STORAGE = 'minio_storage.storage.MinioStaticStorage'
+
+MINIO_STORAGE_ENDPOINT = 'minio:9000'
+MINIO_STORAGE_ACCESS_KEY = os.getenv('MINIO_ROOT_USER', 'minioadmin')
+MINIO_STORAGE_SECRET_KEY = os.getenv('MINIO_ROOT_PASSWORD', 'minioadmin')
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'media'
+MINIO_STORAGE_STATIC_BUCKET_NAME = 'static'
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True
+MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = True
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Static files (CSS, JavaScript, Images)
 
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"  # Redirect after login
+LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"

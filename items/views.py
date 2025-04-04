@@ -13,7 +13,6 @@ from django.contrib import messages
 from .models import LostItem, FoundItem
 
 
-# User Registration
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -25,7 +24,6 @@ def register(request):
         form = UserCreationForm()
     return render(request, "register.html", {"form": form})
 
-# User Login
 def user_login(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -35,7 +33,7 @@ def user_login(request):
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
-                return redirect("home")  # Redirect to home after login
+                return redirect("home")
         messages.error(request, "Invalid username or password")
     else:
         form = AuthenticationForm()
@@ -48,8 +46,8 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    lost_items = LostItem.objects.filter(user=request.user)  # User's lost items
-    found_items = FoundItem.objects.filter(user=request.user)  # User's found items
+    lost_items = LostItem.objects.filter(user=request.user)
+    found_items = FoundItem.objects.filter(user=request.user)
 
     context = {
         "user": request.user,
@@ -94,8 +92,8 @@ def add_lost_item(request):
     if request.method == "POST":
         form = LostItemForm(request.POST, request.FILES)
         if form.is_valid():
-            lost_item = form.save(commit=False)  # Don't save yet
-            lost_item.user = request.user  # Assign the logged-in user
+            lost_item = form.save(commit=False)
+            lost_item.user = request.user
             lost_item.save()  # Now save
             return redirect("lost_items_list")
     else:
@@ -107,9 +105,9 @@ def add_found_item(request):
     if request.method == "POST":
         form = FoundItemForm(request.POST, request.FILES)
         if form.is_valid():
-            found_item = form.save(commit=False)  # Don't save yet
-            found_item.user = request.user  # Assign the logged-in user
-            found_item.save()  # Now save
+            found_item = form.save(commit=False)
+            found_item.user = request.user
+            found_item.save()
             return redirect("found_items_list")
     else:
         form = FoundItemForm()
@@ -127,7 +125,6 @@ def admin_items_list(request):
 def mark_lost_recovered(request, item_id):
     item = get_object_or_404(LostItem, id=item_id)
 
-    # Allow only the user who reported it to mark as recovered
     if request.user == item.user or request.user.is_superuser:
         item.is_recovered = True
         item.status = "recovered"
@@ -142,7 +139,6 @@ def mark_lost_recovered(request, item_id):
 def mark_found_claimed(request, item_id):
     item = get_object_or_404(FoundItem, id=item_id)
 
-    # Allow only the user who reported it to mark as claimed
     if request.user == item.user or request.user.is_superuser:
         item.is_claimed = True
         item.status = "claimed"
