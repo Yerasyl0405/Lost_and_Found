@@ -31,16 +31,41 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "items",
+    'items',
+    'minio_storage',
+    'rest_framework',
+    'corsheaders',
+    'silk'
+
 ]
 
+
+
+
+
+# Разрешить запросы от React (настроить под ваш URL)
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React по умолчанию
+]
+
+# Если API требует аутентификации, добавьте:
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+
+
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Добавить в начало!
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,8 +105,13 @@ WSGI_APPLICATION = 'lost_and_found.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'lost_and_found'),
+        'USER': os.environ.get('DB_USER', 'yerassyl'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '12345era'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+
     }
 }
 
@@ -123,20 +153,34 @@ USE_TZ = True
 
 import os
 
+
+STATIC_URL = 'http://localhost:9000/static/'  # or actual MinIO public URL
+#no
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+SILKY_PYTHON_PROFILER = True  # Enable Python profiler
+
+# Media files configuration (if using MinIO)
+import os
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+DEFAULT_FILE_STORAGE = 'minio_storage.storage.MinioMediaStorage'
+MINIO_STORAGE_MEDIA_URL="http://minio:9000/media/"
+
+
+MINIO_STORAGE_ENDPOINT = 'minio:9000'
+MINIO_STORAGE_ACCESS_KEY = os.getenv('MINIO_ROOT_USER', 'minioadmin')
+MINIO_STORAGE_SECRET_KEY = os.getenv('MINIO_ROOT_PASSWORD', 'minioadmin')
+MINIO_STORAGE_USE_HTTPS = False
+MINIO_STORAGE_MEDIA_BUCKET_NAME = 'media'
+MINIO_STORAGE_STATIC_BUCKET_NAME = 'static'
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True
+MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = True
+MINIO_STORAGE_MEDIA_USE_HTTPS = False  # or True, depending on your setup
+MINIO_STORAGE_MEDIA_BACKUP=False
+
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = "/static/"  # This is required
-
-# Optional: If you want to serve static files from a directory
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),  # Ensure this folder exists
-]
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"  # Redirect after login
+LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"

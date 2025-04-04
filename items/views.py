@@ -3,6 +3,14 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.shortcuts import render, get_object_or_404, redirect
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .forms import LostItemForm, FoundItemForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -11,9 +19,9 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 
 from .models import LostItem, FoundItem
+from .serializers import FoundItemSerializer
 
 
-# User Registration
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -25,7 +33,6 @@ def register(request):
         form = UserCreationForm()
     return render(request, "register.html", {"form": form})
 
-# User Login
 def user_login(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -35,7 +42,7 @@ def user_login(request):
             user = authenticate(request, username=username, password=password)
             if user:
                 login(request, user)
-                return redirect("home")  # Redirect to home after login
+                return redirect("home")
         messages.error(request, "Invalid username or password")
     else:
         form = AuthenticationForm()
@@ -48,8 +55,8 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    lost_items = LostItem.objects.filter(user=request.user)  # User's lost items
-    found_items = FoundItem.objects.filter(user=request.user)  # User's found items
+    lost_items = LostItem.objects.filter(user=request.user)
+    found_items = FoundItem.objects.filter(user=request.user)
 
     context = {
         "user": request.user,
@@ -83,37 +90,51 @@ def lost_items_list(request):
 
 def found_items_list(request):
     items = FoundItem.objects.all()
-    return render(request, "items/found_items_list.html", {"items": items})
+    return render(request, "items/found_item_list.html", {"items": items})
+
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import LostItemForm, FoundItemForm
 
 @login_required
+def add_found_item(request):
+    if request.method == "POST":
+        form = FoundItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            lost_item = form.save(commit=False)
+            lost_item.user = request.user
+            lost_item.save()  # Now save
+            return redirect("found_items_list")
+    else:
+        form = FoundItemForm()
+    return render(request, "items/item_form.html", {"form": form})
+
+@login_required
 def add_lost_item(request):
     if request.method == "POST":
         form = LostItemForm(request.POST, request.FILES)
         if form.is_valid():
-            lost_item = form.save(commit=False)  # Don't save yet
-            lost_item.user = request.user  # Assign the logged-in user
+            lost_item = form.save(commit=False)
+            lost_item.user = request.user
             lost_item.save()  # Now save
             return redirect("lost_items_list")
     else:
         form = LostItemForm()
     return render(request, "items/item_form.html", {"form": form})
 
-@login_required
-def add_found_item(request):
-    if request.method == "POST":
-        form = FoundItemForm(request.POST, request.FILES)
-        if form.is_valid():
-            found_item = form.save(commit=False)  # Don't save yet
-            found_item.user = request.user  # Assign the logged-in user
-            found_item.save()  # Now save
-            return redirect("found_items_list")
-    else:
-        form = FoundItemForm()
-    return render(request, "items/item_form.html", {"form": form})
+class FoundItemCreateAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    renderer_classes = [JSONRenderer]  # Only allow JSON rendering
+    # for image upload
+
+    def post(self, request):
+        serializer = FoundItemSerializer(data=request.data)
+        if serializer.is_valid():
+            found_item = serializer.save(user=request.user)
+            return Response(FoundItemSerializer(found_item).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @user_passes_test(is_staff_user)
@@ -127,7 +148,6 @@ def admin_items_list(request):
 def mark_lost_recovered(request, item_id):
     item = get_object_or_404(LostItem, id=item_id)
 
-    # Allow only the user who reported it to mark as recovered
     if request.user == item.user or request.user.is_superuser:
         item.is_recovered = True
         item.status = "recovered"
@@ -142,7 +162,6 @@ def mark_lost_recovered(request, item_id):
 def mark_found_claimed(request, item_id):
     item = get_object_or_404(FoundItem, id=item_id)
 
-    # Allow only the user who reported it to mark as claimed
     if request.user == item.user or request.user.is_superuser:
         item.is_claimed = True
         item.status = "claimed"
@@ -152,3 +171,5 @@ def mark_found_claimed(request, item_id):
         messages.error(request, "You are not allowed to modify this item.")
 
     return redirect("profile")
+
+
