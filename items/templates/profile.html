@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card p-4 shadow-lg">
+        <h2 class="text-center">Welcome, {{ user.username }}</h2>
+        <p class="text-center text-muted">Email: {{ user.email }}</p>
+        <div class="text-center">
+            <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3 class="mb-3">Your Lost Items</h3>
+        {% if lost_items %}
+            <div class="row">
+               {% for item in lost_items %}
+    {% if not item.is_recovered %}
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.name }}</h5>
+                    <p class="card-text">Lost at <strong>{{ item.location }}</strong> on {{ item.date_lost }}</p>
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-fluid rounded">
+                    {% endif %}
+                    <form method="post" action="{% url 'mark_lost_recovered' item.id %}" class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">I Found</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+
+            </div>
+        {% else %}
+            <p class="text-muted">You have not reported any lost items.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <h3 class="mb-3">Your Found Items</h3>
+        {% if found_items %}
+            <div class="row">
+                {% for item in found_items %}
+                    {% if not item.is_claimed %}
+
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.name }}</h5>
+                                <p class="card-text">Found at <strong>{{ item.location }}</strong> on {{ item.date_found }}</p>
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="img-fluid rounded">
+                                {% endif %}
+                                <form method="post" action="{% url 'mark_found_claimed' item.id %}" class="mt-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary">I Found Owner</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">You have not reported any found items.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
